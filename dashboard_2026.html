@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный доход 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#050608;--bg2:#0c0e12;--bg3:#111520;--bg4:#161b28;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --g:#00ffb3;--g2:#00c98e;--b:#3d8eff;--b2:#1a5ccc;
+  --r:#ff3d6b;--y:#ffc531;--p:#a259ff;--c:#00e5ff;
+  --text:#e8edf5;--muted:#4a5568;--muted2:#718096;
+  --glow:0 0 20px rgba(0,255,179,0.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* grid lines bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,179,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,179,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+/* ── SETTINGS BAR ── */
+#cfg{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,6,8,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:10px;padding:10px 24px;}
+#cfg-url{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:8px 12px;outline:none;max-width:640px;}
+#cfg-url:focus{border-color:var(--g);}
+#cfg-btn{background:var(--g);color:#000;border:none;border-radius:6px;padding:8px 18px;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.05em;white-space:nowrap;}
+#cfg-btn:hover{background:var(--g2);}
+#cfg-status{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);}
+#cfg-time{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto;}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:20px;}
+.spin{width:48px;height:48px;border:2px solid var(--bg3);border-top:2px solid var(--g);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-txt{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--g);letter-spacing:0.2em;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* ── PAGE ── */
+.page{max-width:1600px;margin:0 auto;padding:72px 32px 80px;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+.hdr{display:grid;grid-template-columns:1fr auto;align-items:end;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid var(--border2);position:relative;}
+.hdr::after{content:'';position:absolute;bottom:-1px;left:0;width:200px;height:1px;background:linear-gradient(90deg,var(--g),transparent);}
+.hdr-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:400;color:var(--muted2);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px;}
+.hdr-main{font-family:'Orbitron',sans-serif;font-size:56px;font-weight:900;letter-spacing:0.05em;line-height:1;background:linear-gradient(135deg,var(--text) 0%,var(--g) 60%,var(--c) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-year{font-family:'Orbitron',sans-serif;font-size:56px;font-weight:400;color:var(--g);-webkit-text-fill-color:var(--g);}
+.hdr-right{text-align:right;}
+.hdr-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--g);background:rgba(0,255,179,0.08);border:1px solid rgba(0,255,179,0.2);padding:4px 12px;border-radius:2px;letter-spacing:0.15em;margin-bottom:6px;}
+.hdr-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);}
+
+/* ── SECTION ── */
+.sec{margin-bottom:40px;}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.sec-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--g);letter-spacing:0.2em;}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:500;color:var(--text);letter-spacing:0.1em;}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.kpi{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:24px 26px;overflow:hidden;transition:border-color .2s;}
+.kpi:hover{border-color:var(--border2);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:linear-gradient(90deg,var(--g),var(--c));}
+.kpi.r::before{background:linear-gradient(90deg,var(--r),#ff8a65);}
+.kpi.b::before{background:linear-gradient(90deg,var(--b),var(--p));}
+.kpi.y::before{background:linear-gradient(90deg,var(--y),#ff9800);}
+.kpi::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.05;background:var(--accent-c,var(--g));filter:blur(20px);}
+.kpi.g{--accent-c:var(--g)}.kpi.r{--accent-c:var(--r)}.kpi.b{--accent-c:var(--b)}.kpi.y{--accent-c:var(--y)}
+.kpi-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:0.2em;margin-bottom:12px;}
+.kpi-val{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:10px;letter-spacing:0.02em;}
+.kpi.g .kpi-val{color:var(--g);}
+.kpi.r .kpi-val{color:var(--r);}
+.kpi.b .kpi-val{color:var(--b);}
+.kpi.y .kpi-val{color:var(--y);}
+.kpi-badge{display:inline-flex;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 10px;border-radius:2px;border:1px solid;}
+.kpi.g .kpi-badge{background:rgba(0,255,179,0.08);color:var(--g);border-color:rgba(0,255,179,0.2);}
+.kpi.r .kpi-badge{background:rgba(255,61,107,0.08);color:var(--r);border-color:rgba(255,61,107,0.2);}
+.kpi.b .kpi-badge{background:rgba(61,142,255,0.08);color:var(--b);border-color:rgba(61,142,255,0.2);}
+.kpi.y .kpi-badge{background:rgba(255,197,49,0.08);color:var(--y);border-color:rgba(255,197,49,0.2);}
+
+/* ── MONTH CARDS ── */
+.month-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;}
+.mcrd{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 12px;position:relative;overflow:hidden;transition:border-color .2s,background .2s;}
+.mcrd.active{border-color:rgba(0,255,179,0.2);background:var(--bg3);}
+.mcrd.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g),var(--c));}
+.mcrd-name{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--muted2);letter-spacing:0.1em;margin-bottom:8px;}
+.mcrd.active .mcrd-name{color:var(--g);}
+.mcrd-inc{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--g);font-weight:500;}
+.mcrd-exp{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--r);margin-top:3px;}
+.mcrd-pct{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
+.mcrd-zero .mcrd-inc{color:var(--muted);}
+
+/* ── CHARTS ROW ── */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+.chart-box{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:22px;}
+.chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);}
+.leg-dot{width:8px;height:8px;border-radius:1px;flex-shrink:0;}
+
+/* ── EXPENSE SECTION ── */
+.exp-row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.exp-list{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:22px;}
+.exp-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.exp-item:last-child{border-bottom:none;}
+.exp-name{font-size:12px;color:var(--text);width:120px;flex-shrink:0;}
+.exp-track{flex:1;background:var(--bg4);border-radius:1px;height:4px;overflow:hidden;}
+.exp-fill{height:100%;border-radius:1px;}
+.exp-amt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);width:80px;text-align:right;flex-shrink:0;}
+.exp-pct-txt{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);width:34px;text-align:right;flex-shrink:0;}
+
+/* ── SOURCES TABLE ── */
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.tbl-hdr{display:grid;padding:10px 20px;background:var(--bg4);border-bottom:1px solid var(--border2);}
+.th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;text-align:right;}
+.th:first-child{text-align:left;}
+.tbl-row{display:grid;padding:10px 20px;border-bottom:1px solid var(--border);transition:background .12s;}
+.tbl-row:last-child{border-bottom:none;}
+.tbl-row:hover{background:var(--bg3);}
+.td{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);text-align:right;display:flex;align-items:center;justify-content:flex-end;}
+.td:first-child{color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;justify-content:flex-start;text-align:left;}
+.td.hi{color:var(--text);font-weight:500;}
+.pill{font-size:9px;padding:2px 8px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-weight:500;letter-spacing:0.05em;}
+.pill-g{background:rgba(0,255,179,0.12);color:var(--g);}
+.pill-y{background:rgba(255,197,49,0.12);color:var(--y);}
+.pill-r{background:rgba(255,61,107,0.12);color:var(--r);}
+
+/* ── PLAN SECTION ── */
+.plan-box{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:28px 32px;}
+.plan-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+.plan-num{font-family:'Orbitron',sans-serif;font-size:52px;font-weight:700;color:var(--text);line-height:1;letter-spacing:0.02em;}
+.plan-num span{color:var(--g);}
+.plan-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);margin-top:6px;}
+.plan-pct-big{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:var(--y);text-align:right;line-height:1;}
+.plan-pct-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);text-align:right;margin-top:4px;letter-spacing:0.15em;}
+.prog-track{background:var(--bg4);border-radius:0;height:8px;overflow:hidden;margin-bottom:8px;position:relative;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--b),var(--g),var(--c));transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.prog-labels{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
+.plan-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
+.pmeta{background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:12px 14px;}
+.pmeta-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;}
+.pmeta-val{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:500;color:var(--text);}
+
+/* ── FOOTER ── */
+.ftr{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;}
+
+/* ── SCANLINE OVERLAY ── */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:200;}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spin"></div>
+  <div class="loader-txt">ЗАГРУЗКА ДАННЫХ...</div>
+</div>
+
+<div id="cfg">
+  <input id="cfg-url" type="text" placeholder="https://script.google.com/macros/s/.../exec" />
+  <button id="cfg-btn" onclick="loadData()">SYNC</button>
+  <span id="cfg-status"></span>
+  <span id="cfg-time"></span>
+</div>
+
+<div class="page" id="dash" style="display:none">
+
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">ФИНАНСОВЫЙ ТРЕКЕР</div>
+      <div style="display:flex;align-items:baseline;gap:16px;">
+        <div class="hdr-main">ЛИЧНЫЙ ДОХОД</div>
+        <div class="hdr-year" id="h-year">2026</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-tag" id="h-range">ЯНВ — АПР · 4 МЕС</div>
+      <div class="hdr-date" id="h-date"></div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="sec">
+    <div class="kpi-grid">
+      <div class="kpi g"><div class="kpi-lbl">Доход итого</div><div class="kpi-val" id="k-inc">—</div><div class="kpi-badge" id="k-inc-b">—</div></div>
+      <div class="kpi r"><div class="kpi-lbl">Расходы итого</div><div class="kpi-val" id="k-exp">—</div><div class="kpi-badge" id="k-exp-b">—</div></div>
+      <div class="kpi b"><div class="kpi-lbl">Пассивный доход</div><div class="kpi-val" id="k-pas">—</div><div class="kpi-badge" id="k-pas-b">—</div></div>
+      <div class="kpi y"><div class="kpi-lbl">Чистый доход</div><div class="kpi-val" id="k-net">—</div><div class="kpi-badge" id="k-net-b">—</div></div>
+    </div>
+  </div>
+
+  <!-- MONTHS -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">// 01</div><div class="sec-title">МЕСЯЧНАЯ РАЗБИВКА</div><div class="sec-line"></div></div>
+    <div class="month-grid" id="month-grid"></div>
+  </div>
+
+  <!-- DYNAMIC CHART -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">// 02</div><div class="sec-title">ДИНАМИКА ПОТОКОВ</div><div class="sec-line"></div></div>
+    <div class="charts-row">
+      <div class="chart-box">
+        <div style="position:relative;height:260px;"><canvas id="mainChart"></canvas></div>
+        <div class="chart-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#00ffb3"></div>Доход</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#ff3d6b"></div>Расходы</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#3d8eff"></div>Пассивный</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#ffc531"></div>Чистый</div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div style="position:relative;height:220px;"><canvas id="expDonut"></canvas></div>
+        <div class="chart-legend" id="exp-leg" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">// 03</div><div class="sec-title">СТРУКТУРА РАСХОДОВ</div><div class="sec-line"></div></div>
+    <div class="exp-row2">
+      <div class="exp-list" id="exp-bars"></div>
+      <div class="chart-box" style="display:flex;flex-direction:column;justify-content:center;">
+        <div style="position:relative;height:240px;"><canvas id="srcDonut"></canvas></div>
+        <div class="chart-legend" id="src-leg" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOURCES TABLE -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">// 04</div><div class="sec-title">ИСТОЧНИКИ ДОХОДА · ПЛАН / ФАКТ</div><div class="sec-line"></div></div>
+    <div class="tbl-wrap">
+      <div class="tbl-hdr" id="tbl-hdr"></div>
+      <div id="tbl-body"></div>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-num">// 05</div><div class="sec-title">ВЫПОЛНЕНИЕ ГОДОВОГО ПЛАНА</div><div class="sec-line"></div></div>
+    <div class="plan-box">
+      <div class="plan-top">
+        <div>
+          <div class="plan-num" id="plan-num">— <span>/ —</span></div>
+          <div class="plan-sub" id="plan-sub"></div>
+        </div>
+        <div>
+          <div class="plan-pct-big" id="plan-pct">—%</div>
+          <div class="plan-pct-lbl">ВЫПОЛНЕНО</div>
+        </div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-labels"><span>$0</span><span id="prog-mid"></span><span id="prog-end"></span></div>
+      <div class="plan-meta" id="plan-meta"></div>
+      <div style="position:relative;height:140px;margin-top:8px;"><canvas id="planChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="ftr">
+    <span>ЛИЧНЫЙ ДОХОД // <span id="f-year">2026</span></span>
+    <span id="f-range"></span>
+    <span>USD · REAL-TIME</span>
+  </div>
+</div>
+
+<script>
+var MO = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+var CHARTS = {};
+var STORAGE_KEY = 'dash2026_url';
+var DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxjg9I0W6r8slpuex8yvQIqO3BR9k9NS6h5grvqLVMN0Wjn7iT_1drEOXT2Sn93Y_x_/exec';
+
+function fmt(v){ if(!v&&v!==0)return'—'; return'$'+Math.round(v).toLocaleString('ru'); }
+function fmtK(v){ return v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+Math.round(v); }
+function dc(id){ if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];} }
+function save(u){ try{localStorage.setItem(STORAGE_KEY,u);}catch(e){} }
+function load(){ try{return localStorage.getItem(STORAGE_KEY)||'';}catch(e){return '';} }
+
+function setStatus(msg,color){
+  var el=document.getElementById('cfg-status');
+  el.textContent=msg; el.style.color=color||'var(--muted2)';
+}
+
+function loadData(){
+  var url=document.getElementById('cfg-url').value.trim();
+  if(!url){setStatus('Нет URL','var(--r)');return;}
+  save(url);
+  setStatus('СИНХРОНИЗАЦИЯ...','var(--b)');
+  document.getElementById('loader').style.display='flex';
+  document.getElementById('dash').style.display='none';
+
+  fetch(url)
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(data){
+      setStatus('СИНХРОНИЗИРОВАНО','var(--g)');
+      document.getElementById('cfg-time').textContent='обновлено '+(data.meta&&data.meta.updated?data.meta.updated:new Date().toLocaleTimeString('ru'));
+      render(data);
+    })
+    .catch(function(e){
+      setStatus('ОШИБКА: '+e.message,'var(--r)');
+      document.getElementById('loader').style.display='none';
+    });
+}
+
+function render(data){
+  var s  = data.summary  || {};
+  var sr = data.sources  || {};
+  var sources = sr.sources || [];
+
+  var active = MO.filter(function(m){return (s.income||{})[m]>0;});
+  if(!active.length) active = MO.slice(0,4);
+
+  // Header
+  document.getElementById('h-range').textContent = active[0].toUpperCase()+'—'+active[active.length-1].toUpperCase()+' · '+active.length+' МЕС';
+  document.getElementById('h-date').textContent  = data.meta&&data.meta.updated?'ОБНОВЛЕНО: '+data.meta.updated:'';
+  document.getElementById('f-range').textContent = active[0]+'–'+active[active.length-1]+' 2026';
+
+  // KPI
+  var iT=(s.income||{}).total||0, eT=(s.expenses||{}).total||0, pT=(s.passive||{}).total||0, nT=iT-eT;
+  var ep=iT>0?(eT/iT*100).toFixed(1):0, pp=eT>0?(pT/eT*100).toFixed(1):0, np=iT>0?(nT/iT*100).toFixed(1):0;
+  document.getElementById('k-inc').textContent=fmt(iT);
+  document.getElementById('k-exp').textContent=fmt(eT);
+  document.getElementById('k-pas').textContent=fmt(pT);
+  document.getElementById('k-net').textContent=fmt(nT);
+  document.getElementById('k-inc-b').textContent=active.length+' МЕС ДАННЫХ';
+  document.getElementById('k-exp-b').textContent=ep+'% ОТ ДОХОДА';
+  document.getElementById('k-pas-b').textContent=pp+'% ОТ РАСХОДОВ';
+  document.getElementById('k-net-b').textContent=np+'% МАРЖА';
+
+  // Month cards
+  var mg=document.getElementById('month-grid'); mg.innerHTML='';
+  MO.forEach(function(m){
+    var inc=(s.income||{})[m]||0, exp=(s.expenses||{})[m]||0;
+    var isActive=inc>0;
+    var pct=inc>0?(exp/inc*100).toFixed(0):0;
+    mg.innerHTML+='<div class="mcrd'+(isActive?' active':' mcrd-zero')+'">'
+      +'<div class="mcrd-name">'+m.toUpperCase()+'</div>'
+      +(isActive?'<div class="mcrd-inc">'+fmtK(inc)+'</div><div class="mcrd-exp">−'+fmtK(exp)+'</div><div class="mcrd-pct">'+pct+'% расх</div>'
+        :'<div class="mcrd-inc">—</div>')
+      +'</div>';
+  });
+
+  // Main bar chart
+  var incA=active.map(function(m){return(s.income||{})[m]||0;});
+  var expA=active.map(function(m){return(s.expenses||{})[m]||0;});
+  var pasA=active.map(function(m){return(s.passive||{})[m]||0;});
+  var netA=active.map(function(m){return((s.income||{})[m]||0)-((s.expenses||{})[m]||0);});
+  dc('main');
+  CHARTS.main=new Chart(document.getElementById('mainChart'),{
+    type:'bar',
+    data:{labels:active,datasets:[
+      {label:'Доход',data:incA,backgroundColor:'rgba(0,255,179,0.75)',borderRadius:2},
+      {label:'Расходы',data:expA,backgroundColor:'rgba(255,61,107,0.75)',borderRadius:2},
+      {label:'Пассивный',data:pasA,backgroundColor:'rgba(61,142,255,0.75)',borderRadius:2},
+      {label:'Чистый',data:netA,backgroundColor:'rgba(255,197,49,0.75)',borderRadius:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{family:'IBM Plex Mono',size:11}},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(255,255,255,0.06)'}},
+        y:{ticks:{color:'#4a5568',font:{family:'IBM Plex Mono',size:10},callback:function(v){return'$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(255,255,255,0.06)'}}
+      }
+    }
+  });
+
+  // Expense categories
+  var cats=[
+    {name:'Квартира',key:'apartment',color:'#3d8eff'},
+    {name:'Жизнь',key:'life',color:'#00ffb3'},
+    {name:'Обучение',key:'education',color:'#ffc531'},
+    {name:'Путешествие',key:'travel',color:'#ff3d6b'},
+    {name:'Благотвор.',key:'charity',color:'#a259ff'}
+  ];
+  var maxE=Math.max.apply(null,cats.map(function(c){return(s[c.key]||{}).total||0;}));
+  var barsEl=document.getElementById('exp-bars'); barsEl.innerHTML='';
+  cats.forEach(function(c){
+    var v=(s[c.key]||{}).total||0;
+    var pct=maxE>0?(v/maxE*100).toFixed(1):0;
+    var pctT=eT>0?(v/eT*100).toFixed(1):0;
+    barsEl.innerHTML+='<div class="exp-item">'
+      +'<div class="exp-name">'+c.name+'</div>'
+      +'<div class="exp-track"><div class="exp-fill" style="width:'+pct+'%;background:'+c.color+';"></div></div>'
+      +'<div class="exp-amt">'+fmt(v)+'</div>'
+      +'<div class="exp-pct-txt">'+pctT+'%</div>'
+      +'</div>';
+  });
+
+  // Expense donut
+  dc('expDonut');
+  CHARTS.expDonut=new Chart(document.getElementById('expDonut'),{
+    type:'doughnut',
+    data:{labels:cats.map(function(c){return c.name;}),
+      datasets:[{data:cats.map(function(c){return(s[c.key]||{}).total||0;}),
+        backgroundColor:cats.map(function(c){return c.color;}),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'68%'}
+  });
+  var el=document.getElementById('exp-leg'); el.innerHTML='';
+  cats.forEach(function(c){
+    var v=(s[c.key]||{}).total||0;
+    el.innerHTML+='<div class="leg-item"><div class="leg-dot" style="background:'+c.color+'"></div>'+c.name+' '+fmt(v)+'</div>';
+  });
+
+  // Source donut
+  var srcColors=['#00ffb3','#3d8eff','#ffc531','#ff3d6b','#a259ff','#00e5ff','#ff9800'];
+  dc('srcDonut');
+  CHARTS.srcDonut=new Chart(document.getElementById('srcDonut'),{
+    type:'doughnut',
+    data:{labels:sources.map(function(x){return x.name;}),
+      datasets:[{data:sources.map(function(x){return x.total||0;}),
+        backgroundColor:sources.map(function(_,i){return srcColors[i%srcColors.length];}),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'68%'}
+  });
+  var sl=document.getElementById('src-leg'); sl.innerHTML='';
+  sources.forEach(function(x,i){
+    sl.innerHTML+='<div class="leg-item"><div class="leg-dot" style="background:'+srcColors[i%srcColors.length]+'"></div>'+x.name+'</div>';
+  });
+
+  // Table
+  var cols=['2fr'].concat(active.slice(0,4).map(function(){return'1fr';})).concat(['1.2fr','0.8fr']);
+  var tplCol=cols.join(' ');
+  var hdr=document.getElementById('tbl-hdr');
+  hdr.style.gridTemplateColumns=tplCol;
+  hdr.innerHTML='<div class="th">ИСТОЧНИК</div>'
+    +active.slice(0,4).map(function(m){return'<div class="th">'+m.toUpperCase()+'</div>';}).join('')
+    +'<div class="th">ИТОГО</div><div class="th">% ПЛАН</div>';
+  var body=document.getElementById('tbl-body'); body.innerHTML='';
+  sources.forEach(function(x){
+    var p=x.planY>0?Math.round(x.total/x.planY*100):0;
+    var pc=p>=80?'pill-g':p>=40?'pill-y':'pill-r';
+    var row=document.createElement('div');
+    row.className='tbl-row'; row.style.gridTemplateColumns=tplCol;
+    row.innerHTML='<div class="td">'+x.name+'</div>'
+      +active.slice(0,4).map(function(m){var v=x.months[m]||0;return'<div class="td">'+(v?fmt(v):'—')+'</div>';}).join('')
+      +'<div class="td hi">'+fmt(x.total)+'</div>'
+      +'<div class="td"><span class="pill '+pc+'">'+p+'%</span></div>';
+    body.appendChild(row);
+  });
+
+  // Plan
+  var planY=sr.planY_total||360000;
+  var factTotal=sr.fact_total||iT;
+  var planPct=planY>0?(factTotal/planY*100).toFixed(1):0;
+  var months=active.length;
+  var expected=Math.round(planY/12*months);
+
+  document.getElementById('plan-num').innerHTML=fmt(factTotal)+' <span>/ '+fmt(planY)+'</span>';
+  document.getElementById('plan-sub').textContent='фактически '+fmt(factTotal)+' из '+fmt(planY)+' · '+months+' из 12 месяцев';
+  document.getElementById('plan-pct').textContent=planPct+'%';
+  document.getElementById('prog-mid').textContent='ОЖИД. '+fmt(expected)+' ('+Math.round(months/12*100)+'%)';
+  document.getElementById('prog-end').textContent=fmt(planY);
+  setTimeout(function(){document.getElementById('prog-fill').style.width=Math.min(parseFloat(planPct),100)+'%';},300);
+
+  // Plan meta
+  var pm=document.getElementById('plan-meta');
+  var monthly=months>0?Math.round(factTotal/months):0;
+  var remain=planY-factTotal;
+  var mNeeded=12-months>0?Math.round(remain/(12-months)):0;
+  pm.innerHTML=[
+    ['Среднемес.',fmtK(monthly)],
+    ['Осталось до плана',fmt(remain)],
+    ['Нужно в мес.',fmtK(mNeeded)],
+    ['Темп года (прогноз)',fmtK(monthly*12)]
+  ].map(function(x){return'<div class="pmeta"><div class="pmeta-lbl">'+x[0]+'</div><div class="pmeta-val">'+x[1]+'</div></div>';}).join('');
+
+  // Plan cumulative chart
+  var cumFact=[], cumPlan=[], run=0;
+  MO.forEach(function(m,i){
+    var v=(s.income||{})[m]||0; run+=v;
+    cumFact.push(run>0?run:null);
+    cumPlan.push(Math.round(planY/12*(i+1)));
+  });
+  dc('planChart');
+  CHARTS.planChart=new Chart(document.getElementById('planChart'),{
+    type:'line',
+    data:{labels:MO,datasets:[
+      {label:'Факт',data:cumFact,borderColor:'#00ffb3',backgroundColor:'rgba(0,255,179,0.06)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#00ffb3',borderWidth:2,spanGaps:false},
+      {label:'План',data:cumPlan,borderColor:'#3d8eff',borderDash:[4,4],backgroundColor:'transparent',tension:0.1,pointRadius:0,borderWidth:1.5}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(255,255,255,0.06)'}},
+        y:{ticks:{color:'#4a5568',font:{family:'IBM Plex Mono',size:10},callback:function(v){return'$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(255,255,255,0.06)'}}
+      }
+    }
+  });
+
+  document.getElementById('loader').style.display='none';
+  document.getElementById('dash').style.display='block';
+}
+
+window.onload=function(){
+  var saved=load()||DEFAULT_URL;
+  document.getElementById('cfg-url').value=saved;
+  loadData();
+};
+</script>
+</body>
+</html>
